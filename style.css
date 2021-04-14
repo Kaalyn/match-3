@@ -1,0 +1,19 @@
+div.grid {
+    /*
+    70px * 70px squares
+    8 by 8
+    */
+    height: 560px;
+    width: 560px;
+
+    /*
+    display divs next to eachother
+     */
+    display: flex;
+    flex-wrap: wrap;
+}
+
+div.grid div {
+    height: 70px;
+    width: 70px;
+}
