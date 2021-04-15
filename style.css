@@ -7,14 +7,60 @@ div.grid {
     width: 400px;
 
     /*
-    display divs next to eachother
+    display divs next to each other
      */
     display: flex;
     flex-wrap: wrap;
 }
 
 div.grid div {
-    height: 30px;
-    width: 30px;
-    margin: 10px;
+    height: 40px;
+    width: 40px;
+    margin: 5px;
+
+    border-radius: 85% 15% 85% 15% / 85% 15% 85% 15%;
+
+    -webkit-box-shadow: 10px 10px 15px 3px rgba(0,0,0,0.35), inset 5px 5px 10px 5px rgba(255,255,255,0.45);
+    box-shadow: 10px 10px 15px 3px rgba(0,0,0,0.35), inset 5px 5px 10px 5px rgba(255,255,255,0.45);
+}
+
+/* red bean */
+div.grid div.red {
+    background-color: firebrick;
+    border-radius: 85% 15% 85% 15% / 85% 15% 85% 15%;
+}
+
+/* yellow triangle */
+div.grid div.yellow {
+    background-color: gold;
+    border-radius: 50% 50% 10% 10% / 90% 90% 10% 10%;
+}
+
+/* orange circle */
+div.grid div.orange {
+    background-color: darkorange;
+    border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+}
+
+/* purple square */
+div.grid div.purple {
+    background-color: purple;
+    border-radius: 10% 10% 10% 10% / 10% 10% 10% 10%;
+}
+
+/* green drop */
+div.grid div.green {
+    background-color: green;
+    border-radius: 10% 90% 50% 50% / 10% 50% 50% 90% ;
+}
+
+/* blue diamond*/
+div.grid div.blue {
+    background-color: darkblue;
+    border-radius: 100% 50% 100% 50% / 50% 100% 50% 100%;
+}
+
+div.grid div.blank {
+    box-shadow: unset;
+    -webkit-box-shadow: unset;
 }
