@@ -17,4 +17,42 @@ div.grid div {
     height: 30px;
     width: 30px;
     margin: 10px;
+
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* red pentagon */
+div.grid div.red {
+    background-color: firebrick;
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+/* yellow triangle */
+div.grid div.yellow {
+    background-color: gold;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+/* orange circle */
+div.grid div.orange {
+    background-color: orangered;
+    clip-path: circle(50% at 50% 50%);
+}
+
+/* purple square */
+div.grid div.purple {
+    background-color: purple;
+    clip-path: unset;
+}
+
+/* green trapezium */
+div.grid div.green {
+    background-color: green;
+    clip-path: polygon(25% 100%, 75% 100%, 100% 0, 0 0);
+}
+
+/* blue diamond*/
+div.grid div.blue {
+    background-color: darkblue;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
