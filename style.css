@@ -25,9 +25,8 @@ div.grid div {
     -webkit-box-shadow: 10px 10px 15px 3px rgba(0,0,0,0.35), inset 5px 5px 10px 5px rgba(255,255,255,0.45);
     box-shadow: 10px 10px 15px 3px rgba(0,0,0,0.35), inset 5px 5px 10px 5px rgba(255,255,255,0.45);
 
-    transition-property: background-color;
-    transition-duration: 10s;
-    transition-timing-function: cubic-bezier(0,2.25,0,0);
+    /* TODO: add webkit styling*/
+    transition: background-color 10s cubic-bezier(0,2.25,0,0), height .5s ease, margin-top .5s ease-out;
 
     /* shimmering effect
     -webkit-transition: background-color 1s ease-in;
@@ -71,9 +70,11 @@ div.grid div.blue {
 }
 
 div.grid div.blank {
-     /*box-shadow: unset;
-    -webkit-box-shadow: unset; */
+    box-shadow: unset;
+    -webkit-box-shadow: unset;
 
+    height: 0;
+    margin-top: 45px;
 
     /* Explosion */
     visibility: hidden;
