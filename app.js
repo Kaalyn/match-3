@@ -28,21 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // maybe let this trigger only when stuff would change?
     window.setInterval(function (){
         onStatusChanged();
-    }, 1000)
+    }, 150)
 })
 
 function onStatusChanged() {
-    // TODO: SOMETHING HERE SO NO MATCHES WHILE DROP ACTIVE
-    let boardHasGaps;
-    do {
-        boardHasGaps = moveDown();
-    } while (boardHasGaps)
-
-    checkMatches();
-    // checkRowOfFour();
-    // checkColumnOfFour();
-    // checkRowOfThree();
-    // checkColumnOfThree();
+    let boardFilled = moveDown();
+    if (boardFilled) {
+        checkMatches();
+    }
 }
 
 // Idea: width + height
@@ -128,14 +121,14 @@ function moveDown() {
     // we want the blocks to fall row by row
     // but we don't want matches to trigger while blocks are falling
     // --> while
-    let containsBlank = false;
+    let isFull = true;
 
     // Get all squares in DOM
     for (let item of document.querySelectorAll(`div.grid div`)) {
         // If no background
         if (item.className === `blank`) {
             // grid contains blanks
-            containsBlank = true;
+            isFull = false;
         }
     }
 
@@ -170,7 +163,7 @@ function moveDown() {
         }
     }
 
-    return containsBlank;
+    return isFull;
 }
 
 // Check for matches
