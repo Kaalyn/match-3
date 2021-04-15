@@ -9,3 +9,4 @@ Resources:
 * [Tutorial](https://www.youtube.com/watch?v=XD5sZWxwJUk)
 * [Clippy - CSS clip-path maker](https://bennettfeely.com/clippy/)
 * Alternative: [Fancy border radius](https://9elements.github.io/fancy-border-radius/)
+* [Box Shadow generator](https://html-css-js.com/css/generator/box-shadow/)

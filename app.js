@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // TODO: SOMETHING HERE SO NO MATCHES WHILE DROP ACTIVE
         do {
-            moveDown();
+            boardHasGaps = moveDown();
         } while (boardHasGaps)
 
         checkRowOfFour();
