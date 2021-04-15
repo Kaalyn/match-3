@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // maybe let this trigger only when stuff would change?
     window.setInterval(function (){
         onStatusChanged();
-    }, 150)
+    }, 200)
 })
 
 function onStatusChanged() {
@@ -70,10 +70,7 @@ function createBoard(width, grid) {
 
             // put square in grid and in array
             grid.appendChild(square);
-            //row.push(square);
         }
-
-        //array.push(row);
     }
 }
 
@@ -167,7 +164,6 @@ function moveDown() {
 }
 
 // Check for matches
-// TODO: add angles/T's
 function checkMatches() {
     // for lengths from 6 to 3 (starting at largest)
     for (let checkingLength = 6; checkingLength > 2; checkingLength-- ) {
@@ -195,7 +191,6 @@ function checkMatches() {
     }
 }
 
-// Generic function to check rows
 function checkForRow(id, amountToCheck) {
     // empty array to store ID's in
     let rowArray = [];
@@ -205,7 +200,16 @@ function checkForRow(id, amountToCheck) {
         rowArray.push(document.getElementById((id - i).toString()));
     }
 
+    // If colors match
+    // Check on other axis if all the colors in the column match
     if (isSameColor(rowArray)) {
+        rowArray.forEach(function (itemChecked){
+            let secondaryArray = secondaryColumn(parseInt(itemChecked.id), itemChecked.className);
+
+            secondaryArray.forEach(function(itemAdded){
+                rowArray.push(itemAdded);
+            })
+        })
         onColorMatch(rowArray);
     }
 }
@@ -219,72 +223,132 @@ function checkForColumn(id, amountToCheck) {
         columnArray.push(document.getElementById((id - (10 * i)).toString()));
     }
 
-    // Check on other axis
-    // ONLY FOR COLUMN - columns are checked first
-
-    // if all the colors in the column match
+    // Check on other axis if all the colors in the column match
     if (isSameColor(columnArray)) {
-        // check if there is a multidimensional match
-        for (let i = 0; i < columnArray.length; i++) {
-            // Copy existing array into new array
-            let twoAxisArray = columnArray.map(x => x);
-            let distanceFromAxis = -1;
+        columnArray.forEach(function (itemChecked){
+            let secondaryArray = secondaryRow(parseInt(itemChecked.id), itemChecked.className);
 
-            // Booleans to store whether we can still match on the left/right
-            let canMatchLeft = true;
-            let canMatchRight = true;
-
-            // Yes, yes, code duplication
-            // also nesting hell
-            // fix later
-
-            // As long as there are matches possible on the left
-            while (canMatchLeft) {
-                // get the square to the left of the leftmost square
-                let checkingId = parseInt(columnArray[i].id) + distanceFromAxis;
-                let checkingSquare = document.getElementById(checkingId.toString());
-
-                // if our square is not null and has the correct color
-                if (checkingSquare.className === twoAxisArray[0].className && checkingSquare){
-                    // Add square to new array
-                    twoAxisArray.push(checkingSquare);
-
-                    // move one further to the left in the next iteration
-                    distanceFromAxis--;
-                } else {
-                    // Stop looking to the left
-                    canMatchLeft = false;
-                }
-            }
-
-            //reset distance
-            distanceFromAxis = 1;
-
-            // As long as there are matches possible on the right
-            while (canMatchRight) {
-                // get the square to the right of the leftmost square
-                let checkingId = parseInt(columnArray[i].id) + distanceFromAxis;
-                let checkingSquare = document.getElementById(checkingId.toString());
-
-                // if our square is not null and has the correct color
-                if (checkingSquare.className === twoAxisArray[0].className && checkingSquare){
-                    // Add square to new array
-                    twoAxisArray.push(checkingSquare);
-
-                    // move one further to the left in the next iteration
-                    distanceFromAxis--;
-                } else {
-                    // Stop looking to the left
-                    canMatchRight = false;
-                }
-            }
-
-            if (twoAxisArray.length > columnArray.length + 1) {
-                columnArray = twoAxisArray;
-                break;
-            }
-        }
+            secondaryArray.forEach(function(itemAdded){
+                columnArray.push(itemAdded);
+            })
+        })
         onColorMatch(columnArray);
+    }
+}
+
+// Check for secondary axis
+// CODE DUPLICATION!!!
+function secondaryRow(id, color) {
+    // Booleans to store whether we can still match on the left/right
+    let canMatchLeft = true;
+    let canMatchRight = true;
+
+    let array = [];
+
+    let distanceFromAxis = -1;
+
+    // As long as there are matches possible on the left
+    while (canMatchLeft) {
+        // get the square to the left of the leftmost square
+        let checkingId = id + distanceFromAxis;
+        let checkingSquare = document.getElementById(checkingId.toString());
+
+        // if our square is not null and has the correct color
+        if (checkingSquare && checkingSquare.className === color){
+            // Add square to new array
+            array.push(checkingSquare);
+
+            // move one further to the left in the next iteration
+            distanceFromAxis--;
+        } else {
+            // Stop looking to the left
+            canMatchLeft = false;
+        }
+    }
+
+    // Move to the right
+    distanceFromAxis = 1;
+
+    // As long as there are matches possible on the right
+    while (canMatchRight) {
+        // get the square to the right of the leftmost square
+        let checkingId = id + distanceFromAxis;
+        let checkingSquare = document.getElementById(checkingId.toString());
+
+        // if our square is not null and has the correct color
+        if (checkingSquare && checkingSquare.className === color) {
+            // Add square to new array
+            array.push(checkingSquare);
+
+            // move one further to the left in the next iteration
+            distanceFromAxis++;
+        } else {
+            // Stop looking to the left
+            canMatchRight = false;
+        }
+    }
+
+    if (array.length > 1 ) {
+        return array;
+    } else {
+        return [];
+    }
+}
+
+function secondaryColumn(id, color) {
+    // Booleans to store whether we can still match on the top/bottom
+    let canMatchBottom = true;
+    let canMatchTop = true;
+
+    let array = [];
+
+    let distanceFromAxis = -10;
+
+    // As long as there are matches possible on the left
+    while (canMatchBottom) {
+        // get the square to the left of the leftmost square
+        let checkingId = id + distanceFromAxis;
+        let checkingSquare = document.getElementById(checkingId.toString());
+
+        // if our square is not null and has the correct color
+        if (checkingSquare && checkingSquare.className === color){
+            // Add square to new array
+            array.push(checkingSquare);
+
+            // move one further to the left in the next iteration
+            distanceFromAxis -= 10;
+        } else {
+            // Stop looking to the left
+            canMatchBottom = false;
+        }
+    }
+
+    // Move to the right
+    distanceFromAxis = 10;
+
+    // As long as there are matches possible on the right
+    while (canMatchTop) {
+        // get the square to the right of the leftmost square
+        let checkingId = id + distanceFromAxis;
+        let checkingSquare = document.getElementById(checkingId.toString());
+
+        // if our square is not null and has the correct color
+        if (checkingSquare && checkingSquare.className === color) {
+            // Add square to new array
+            array.push(checkingSquare);
+
+            // move one further to the left in the next iteration
+            distanceFromAxis += 10;
+        } else {
+            // Stop looking to the left
+            canMatchTop = false;
+        }
+    }
+
+    if (array.length > 1 ) {
+        return array;
+    } else {
+        return [];
     }
 }
 
