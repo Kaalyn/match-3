@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create board
     createBoard(width, grid);
 
-    let boardHasGaps;
     // set timer
     // maybe let this trigger only when stuff would change?
     window.setInterval(function (){
@@ -34,14 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function onStatusChanged() {
     // TODO: SOMETHING HERE SO NO MATCHES WHILE DROP ACTIVE
+    let boardHasGaps;
     do {
         boardHasGaps = moveDown();
     } while (boardHasGaps)
 
-    checkRowOfFour();
-    checkColumnOfFour();
-    checkRowOfThree();
-    checkColumnOfThree();
+    checkMatches();
+    // checkRowOfFour();
+    // checkColumnOfFour();
+    // checkRowOfThree();
+    // checkColumnOfThree();
 }
 
 // Idea: width + height
@@ -173,79 +174,40 @@ function moveDown() {
 }
 
 // Check for matches
-// TODO: add 5, add angles/T's
-function checkRowOfFour() {
-    //Rows
-    // For every row
-    for (let i = 0; i < width; i++) {
+// TODO: add angles/T's
+function checkMatches() {
+    // for lengths from 6 to 3 (starting at largest)
+    for (let checkingLength = 6; checkingLength > 2; checkingLength-- ) {
+        // for every row
+        for (let rowNumber = 0; rowNumber < width; rowNumber++) {
+            // for every square in this row
+            for (let columnNumber = 0; columnNumber < width; columnNumber++) {
+                // Get the id for this square
+                let checkingId = rowNumber * 10 + columnNumber;
 
-        // Squares in row
-        // For all squares but the first two squares
-        // moving right to left - one way to avoid recalculating end condition
-        for (let j = 3; j < width; j++) {
-            // Rightmost square
-            let checkingId = i * 10 + j;
+                // if our row number is greater than the length we're checking minus two
+                // check for matches in de squares above
+                if (rowNumber > checkingLength - 2) {
+                    checkForColumn(checkingId, checkingLength);
+                }
 
-            checkRowFor(checkingId, 4);
+                // if our column number is greater than the length we're checking minus two
+                // check for matches in de squares to the left
+                if (columnNumber > checkingLength - 2){
+                    checkForRow(checkingId, checkingLength);
+                }
+            }
         }
-    }
-}
-function checkColumnOfFour() {
-    //Rows
-    // For all but the top two rows
-    // moving bottom to top - one way to avoid recalculating end condition
-    for (let i = 3; i < width; i++) {
 
-        // Squares in row
-        // For all rows
-        for (let j = 0; j < width; j++) {
-            // Rightmost square
-            let checkingId = i * 10 + j;
-
-            checkColumnFor(checkingId, 4);
-        }
-    }
-}
-
-function checkRowOfThree() {
-    //Rows
-    // For every row
-    for (let i = 0; i < width; i++) {
-
-        // Squares in row
-        // For all squares but the first two squares
-        // moving right to left - one way to avoid recalculating end condition
-        for (let j = 2; j < width; j++) {
-            // Rightmost square
-            let checkingId = i * 10 + j;
-
-            checkRowFor(checkingId, 3);
-        }
-    }
-}
-
-function checkColumnOfThree() {
-    //Rows
-    // For all but the top two rows
-    // moving bottom to top - one way to avoid recalculating end condition
-    for (let i = 2; i < width; i++) {
-
-        // Squares in row
-        // For all rows
-        for (let j = 0; j < width; j++) {
-            // Rightmost square
-            let checkingId = i * 10 + j;
-
-            checkColumnFor(checkingId, 3);
-        }
     }
 }
 
 // Generic function to check rows
-function checkRowFor(id, amountToCheck) {
+function checkForRow(id, amountToCheck) {
     // empty array to store ID's in
     let rowArray = [];
 
+    // Add relevant squares
     for (let i = 0; i < amountToCheck; i++) {
         rowArray.push(document.getElementById((id - i).toString()));
     }
@@ -253,10 +215,11 @@ function checkRowFor(id, amountToCheck) {
     checkColor(rowArray);
 }
 
-function checkColumnFor(id, amountToCheck) {
+function checkForColumn(id, amountToCheck) {
     // empty array to store ID's in
     let columnArray = [];
 
+    // Add relevant squares
     for (let i = 0; i < amountToCheck; i++) {
         columnArray.push(document.getElementById((id - (10 * i)).toString()));
     }
