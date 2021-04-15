@@ -205,7 +205,9 @@ function checkForRow(id, amountToCheck) {
         rowArray.push(document.getElementById((id - i).toString()));
     }
 
-    checkColor(rowArray);
+    if (isSameColor(rowArray)) {
+        onColorMatch(rowArray);
+    }
 }
 
 function checkForColumn(id, amountToCheck) {
@@ -217,24 +219,35 @@ function checkForColumn(id, amountToCheck) {
         columnArray.push(document.getElementById((id - (10 * i)).toString()));
     }
 
-    checkColor(columnArray);
+    if (isSameColor(columnArray)) {
+        onColorMatch(columnArray);
+    }
 }
 
-// Removes the background in an array of divs
-// if all divs have the same bg color
-function checkColor(array){
+// checks if al the squares in the array have the same color
+function isSameColor(array) {
     // get the color of the first item in the array
     let colorToCheck = array[0].className;
 
-    if (array.every(item => item.className === colorToCheck && colorToCheck !== `blank`)) {
-        score += Math.floor((array.length / 2.0) * (1 + array.length));
-        scoreDisplay.innerHTML = score;
+    let isMatch = false;
 
-        // remove bg
-        array.forEach(item => {
-            item.className = `blank`;
-        })
+    if (array.every(item => item.className === colorToCheck && colorToCheck !== `blank`)) {
+        isMatch = true;
     }
+
+    return isMatch;
+
+}
+
+// executes scoring and removing matched squares
+function onColorMatch(array) {
+    score += Math.floor((array.length / 2.0) * (1 + array.length));
+    scoreDisplay.innerHTML = score;
+
+    // remove bg
+    array.forEach(item => {
+        item.className = `blank`;
+    })
 }
 
 function randomColor() {
