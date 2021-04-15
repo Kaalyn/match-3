@@ -28,18 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // set timer
     // maybe let this trigger only when stuff would change?
     window.setInterval(function (){
-
-        // TODO: SOMETHING HERE SO NO MATCHES WHILE DROP ACTIVE
-        do {
-            boardHasGaps = moveDown();
-        } while (boardHasGaps)
-
-        checkRowOfFour();
-        checkColumnOfFour();
-        checkRowOfThree();
-        checkColumnOfThree();
+        onStatusChanged();
     }, 1000)
 })
+
+function onStatusChanged() {
+    // TODO: SOMETHING HERE SO NO MATCHES WHILE DROP ACTIVE
+    do {
+        boardHasGaps = moveDown();
+    } while (boardHasGaps)
+
+    checkRowOfFour();
+    checkColumnOfFour();
+    checkRowOfThree();
+    checkColumnOfThree();
+}
 
 // Idea: width + height
 // Based on screen dimensions?
@@ -183,15 +186,7 @@ function checkRowOfFour() {
             // Rightmost square
             let checkingId = i * 10 + j;
 
-            // Fill array with squares to be checked
-            let rowOfThree = [
-                document.getElementById((checkingId - 3).toString()),
-                document.getElementById((checkingId - 2).toString()),
-                document.getElementById((checkingId - 1).toString()),
-                document.getElementById((checkingId).toString())
-            ];
-
-            checkColor(rowOfThree, 5);
+            checkRowFor(checkingId, 4);
         }
     }
 }
@@ -207,18 +202,11 @@ function checkColumnOfFour() {
             // Rightmost square
             let checkingId = i * 10 + j;
 
-            // Fill array with squares to be checked
-            let columnOfThree = [
-                document.getElementById((checkingId - 30).toString()),
-                document.getElementById((checkingId - 20).toString()),
-                document.getElementById((checkingId - 10).toString()),
-                document.getElementById((checkingId).toString())
-            ];
-
-            checkColor(columnOfThree, 5);
+            checkColumnFor(checkingId, 4);
         }
     }
 }
+
 function checkRowOfThree() {
     //Rows
     // For every row
@@ -231,17 +219,11 @@ function checkRowOfThree() {
             // Rightmost square
             let checkingId = i * 10 + j;
 
-            // Fill array with squares to be checked
-            let rowOfThree = [
-                document.getElementById((checkingId - 2).toString()),
-                document.getElementById((checkingId - 1).toString()),
-                document.getElementById((checkingId).toString())
-            ];
-
-            checkColor(rowOfThree, 3);
+            checkRowFor(checkingId, 3);
         }
     }
 }
+
 function checkColumnOfThree() {
     //Rows
     // For all but the top two rows
@@ -254,26 +236,42 @@ function checkColumnOfThree() {
             // Rightmost square
             let checkingId = i * 10 + j;
 
-            // Fill array with squares to be checked
-            let columnOfThree = [
-                document.getElementById((checkingId - 20).toString()),
-                document.getElementById((checkingId - 10).toString()),
-                document.getElementById((checkingId).toString())
-            ];
-
-            checkColor(columnOfThree, 3);
+            checkColumnFor(checkingId, 3);
         }
     }
 }
 
+// Generic function to check rows
+function checkRowFor(id, amountToCheck) {
+    // empty array to store ID's in
+    let rowArray = [];
+
+    for (let i = 0; i < amountToCheck; i++) {
+        rowArray.push(document.getElementById((id - i).toString()));
+    }
+
+    checkColor(rowArray);
+}
+
+function checkColumnFor(id, amountToCheck) {
+    // empty array to store ID's in
+    let columnArray = [];
+
+    for (let i = 0; i < amountToCheck; i++) {
+        columnArray.push(document.getElementById((id - (10 * i)).toString()));
+    }
+
+    checkColor(columnArray);
+}
+
 // Removes the background in an array of divs
 // if all divs have the same bg color
-function checkColor(array, pointValue){
+function checkColor(array){
     // get the color of the first item in the array
     let colorToCheck = array[0].className;
 
     if (array.every(item => item.className === colorToCheck && colorToCheck !== `blank`)) {
-        score += pointValue;
+        score += Math.floor((array.length / 2.0) * (1 + array.length));
         scoreDisplay.innerHTML = score;
 
         // remove bg
