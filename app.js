@@ -1,6 +1,5 @@
 const width = 8;
 
-// Transparent ? To give background image?
 const candyColors = [
     `red`,
     `yellow`,
@@ -56,7 +55,7 @@ function createBoard(width, grid) {
             let square = document.createElement(`div`);
 
             // Give square a random background color from the array
-            square.style.backgroundColor = randomColor();
+            square.className = randomColor();
 
             // Draggable - change to not show?
             square.setAttribute(`draggable`, `true`);
@@ -106,9 +105,9 @@ function dragDrop() {
     // No need to check if there is an actual item being selected
     if (validMoves.includes(parseInt(squareReplaced.id))) {
         // Switch colours
-        let savedColour = squareDragged.style.backgroundColor;
-        squareDragged.style.backgroundColor = squareReplaced.style.backgroundColor;
-        squareReplaced.style.backgroundColor = savedColour;
+        let savedColour = squareDragged.className;
+        squareDragged.className = squareReplaced.className;
+        squareReplaced.className = savedColour;
     } else {
         console.log(`Invalid move`);
     }
@@ -130,7 +129,7 @@ function moveDown() {
     // Get all squares in DOM
     for (let item of document.querySelectorAll(`div.grid div`)) {
         // If no background
-        if (!item.style.backgroundColor) {
+        if (item.className === `blank`) {
             // grid contains blanks
             containsBlank = true;
         }
@@ -144,15 +143,15 @@ function moveDown() {
             let checkingSquare = document.getElementById((checkingId).toString());
 
             // If square is empty
-            if (!checkingSquare.style.backgroundColor) {
+            if (checkingSquare.className === `blank`) {
                 // Get square above
                 let fallingSquare = document.getElementById((checkingId -10).toString());
 
                 // copy color of square above
-                checkingSquare.style.backgroundColor = fallingSquare.style.backgroundColor;
+                checkingSquare.className = fallingSquare.className;
 
                 // empty square above
-                fallingSquare.style.backgroundColor = ``;
+                fallingSquare.className= `blank`;
             }
         }
     }
@@ -162,8 +161,8 @@ function moveDown() {
         let checkingSquare = document.getElementById((j).toString());
 
         // If the square has no bg
-        if (!checkingSquare.style.backgroundColor) {
-            checkingSquare.style.backgroundColor = randomColor();
+        if (checkingSquare.className === `blank`) {
+            checkingSquare.className = randomColor();
         }
     }
 
@@ -271,17 +270,15 @@ function checkColumnOfThree() {
 // if all divs have the same bg color
 function checkColor(array, pointValue){
     // get the color of the first item in the array
-    let colorToCheck = array[0].style.backgroundColor;
+    let colorToCheck = array[0].className;
 
-    // empty string is falsy
-    // won't execute if there's no background color (checkingColor is an empty string)
-    if (array.every(item => item.style.backgroundColor === colorToCheck && colorToCheck)) {
+    if (array.every(item => item.className === colorToCheck && colorToCheck !== `blank`)) {
         score += pointValue;
         scoreDisplay.innerHTML = score;
 
         // remove bg
         array.forEach(item => {
-            item.style.backgroundColor = ``;
+            item.className = `blank`;
         })
     }
 }

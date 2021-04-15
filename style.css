@@ -38,7 +38,7 @@ div.grid div.yellow {
 
 /* orange circle */
 div.grid div.orange {
-    background-color: orangered;
+    background-color: darkorange;
     border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
 }
 
@@ -48,16 +48,16 @@ div.grid div.purple {
     border-radius: 10% 10% 10% 10% / 10% 10% 10% 10%;
 }
 
-/* blue diamond*/
-div.grid div.blue {
-    background-color: darkblue;
-    border-radius: 100% 50% 100% 50% / 50% 100% 50% 100%;
-}
-
 /* green drop */
 div.grid div.green {
     background-color: green;
     border-radius: 10% 90% 50% 50% / 10% 50% 50% 90% ;
+}
+
+/* blue diamond*/
+div.grid div.blue {
+    background-color: darkblue;
+    border-radius: 100% 50% 100% 50% / 50% 100% 50% 100%;
 }
 
 div.grid div.blank {
