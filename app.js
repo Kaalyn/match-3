@@ -219,7 +219,71 @@ function checkForColumn(id, amountToCheck) {
         columnArray.push(document.getElementById((id - (10 * i)).toString()));
     }
 
+    // Check on other axis
+    // ONLY FOR COLUMN - columns are checked first
+
+    // if all the colors in the column match
     if (isSameColor(columnArray)) {
+        // check if there is a multidimensional match
+        for (let i = 0; i < columnArray.length; i++) {
+            // Copy existing array into new array
+            let twoAxisArray = columnArray.map(x => x);
+            let distanceFromAxis = -1;
+
+            // Booleans to store whether we can still match on the left/right
+            let canMatchLeft = true;
+            let canMatchRight = true;
+
+            // Yes, yes, code duplication
+            // also nesting hell
+            // fix later
+
+            // As long as there are matches possible on the left
+            while (canMatchLeft) {
+                // get the square to the left of the leftmost square
+                let checkingId = parseInt(columnArray[i].id) + distanceFromAxis;
+                let checkingSquare = document.getElementById(checkingId.toString());
+
+                // if our square is not null and has the correct color
+                if (checkingSquare.className === twoAxisArray[0].className && checkingSquare){
+                    // Add square to new array
+                    twoAxisArray.push(checkingSquare);
+
+                    // move one further to the left in the next iteration
+                    distanceFromAxis--;
+                } else {
+                    // Stop looking to the left
+                    canMatchLeft = false;
+                }
+            }
+
+            //reset distance
+            distanceFromAxis = 1;
+
+            // As long as there are matches possible on the right
+            while (canMatchRight) {
+                // get the square to the right of the leftmost square
+                let checkingId = parseInt(columnArray[i].id) + distanceFromAxis;
+                let checkingSquare = document.getElementById(checkingId.toString());
+
+                // if our square is not null and has the correct color
+                if (checkingSquare.className === twoAxisArray[0].className && checkingSquare){
+                    // Add square to new array
+                    twoAxisArray.push(checkingSquare);
+
+                    // move one further to the left in the next iteration
+                    distanceFromAxis--;
+                } else {
+                    // Stop looking to the left
+                    canMatchRight = false;
+                }
+            }
+
+            if (twoAxisArray.length > columnArray.length + 1) {
+                columnArray = twoAxisArray;
+                break;
+            }
+        }
         onColorMatch(columnArray);
     }
 }
