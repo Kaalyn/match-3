@@ -1,3 +1,58 @@
+/* colour scheme variables */
+:root {
+    --background: cornflowerblue;
+    --overlay: rgba(255, 255, 255, 0.3);
+    --title: black;
+    --text: midnightblue;
+    --accent: indigo;
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    align-content: stretch;
+
+    background-color: var(--background);
+}
+
+body>* {
+    margin: 10px;
+    padding: 10px;
+    background: var(--overlay);
+}
+
+/* fonts */
+h1 {
+    font-family: Impact, Charcoal, sans-serif;
+    font-size: 39px;
+    color: var(--title);
+    font-weight: 400;
+    font-variant: small-caps;
+}
+
+/* Game info */
+div.info {
+    /* standard width so divs scale equally */
+    width: 150px;
+    min-width: 100px;
+    max-width: 250px;
+
+    min-height: 300px;
+
+    flex-grow: 1;
+    flex-shrink: 1;
+
+    border: 5px solid var(--accent);
+}
+
+div.info div {
+
+}
+
+/* Game grid */
 div.grid {
     /*
     50px * 50px squares
@@ -6,13 +61,24 @@ div.grid {
     height: 400px;
     width: 400px;
 
+    flex-grow: 0;
+    flex-shrink: 0;
+
     /*
     display divs next to each other
      */
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: center;
 }
 
+
+/*
+Square styling
+*/
+
+/* General styling */
 div.grid div {
     height: 40px;
     width: 40px;
@@ -25,12 +91,8 @@ div.grid div {
     -webkit-box-shadow: 10px 10px 15px 3px rgba(0,0,0,0.35), inset 5px 5px 10px 5px rgba(255,255,255,0.45);
     box-shadow: 10px 10px 15px 3px rgba(0,0,0,0.35), inset 5px 5px 10px 5px rgba(255,255,255,0.45);
 
-    /* TODO: add webkit styling*/
+    /* Drop transition animation */
     transition: background-color 10s cubic-bezier(0,2.25,0,0), height .5s ease, margin-top .5s ease-out;
-
-    /* shimmering effect
-    -webkit-transition: background-color 1s ease-in;
-    transition: background-color 1s ease-in; */
 }
 
 /* red bean */
