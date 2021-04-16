@@ -80,6 +80,8 @@ div.grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(10, 1fr);
+
+    user-select: none;
 }
 
 div.grid::before {
