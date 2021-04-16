@@ -58,7 +58,7 @@ function createBoard(width, grid) {
             square.setAttribute(`draggable`, `true`);
 
             // id = row / column
-            let id = i * 10 + j;
+            let id = i * 100 + j;
             square.setAttribute(`id`, id.toString());
 
             // Event Listeners
@@ -91,8 +91,8 @@ function dragDrop() {
         idDragged - 1,
         idDragged + 1,
         // above and below
-        idDragged + 10,
-        idDragged - 10
+        idDragged + 100,
+        idDragged - 100
     ];
 
     // If we execute on drop
@@ -133,13 +133,13 @@ function moveDown() {
     for (let i = width - 1; i > 0; i--) {
         // for all squares in this row
         for (let j = 0; j < width; j++){
-            let checkingId = i * 10 + j;
+            let checkingId = i * 100 + j;
             let checkingSquare = document.getElementById((checkingId).toString());
 
             // If square is empty
             if (checkingSquare.className === `blank`) {
                 // Get square above
-                let fallingSquare = document.getElementById((checkingId -10).toString());
+                let fallingSquare = document.getElementById((checkingId -100).toString());
 
                 // copy color of square above
                 checkingSquare.className = fallingSquare.className;
@@ -172,7 +172,7 @@ function checkMatches() {
             // for every square in this row
             for (let columnNumber = 0; columnNumber < width; columnNumber++) {
                 // Get the id for this square
-                let checkingId = rowNumber * 10 + columnNumber;
+                let checkingId = rowNumber * 100 + columnNumber;
 
                 // if our row number is greater than the length we're checking minus two
                 // check for matches in de squares above
@@ -220,7 +220,7 @@ function checkForColumn(id, amountToCheck) {
 
     // Add relevant squares
     for (let i = 0; i < amountToCheck; i++) {
-        columnArray.push(document.getElementById((id - (10 * i)).toString()));
+        columnArray.push(document.getElementById((id - (100 * i)).toString()));
     }
 
     // Check on other axis if all the colors in the column match
@@ -302,7 +302,7 @@ function secondaryColumn(id, color) {
 
     let array = [];
 
-    let distanceFromAxis = -10;
+    let distanceFromAxis = -100;
 
     // As long as there are matches possible on the left
     while (canMatchBottom) {
@@ -316,7 +316,7 @@ function secondaryColumn(id, color) {
             array.push(checkingSquare);
 
             // move one further to the left in the next iteration
-            distanceFromAxis -= 10;
+            distanceFromAxis -= 100;
         } else {
             // Stop looking to the left
             canMatchBottom = false;
@@ -324,7 +324,7 @@ function secondaryColumn(id, color) {
     }
 
     // Move to the right
-    distanceFromAxis = 10;
+    distanceFromAxis = 100;
 
     // As long as there are matches possible on the right
     while (canMatchTop) {
@@ -338,7 +338,7 @@ function secondaryColumn(id, color) {
             array.push(checkingSquare);
 
             // move one further to the left in the next iteration
-            distanceFromAxis += 10;
+            distanceFromAxis += 100;
         } else {
             // Stop looking to the left
             canMatchTop = false;
@@ -382,4 +382,3 @@ function randomColor() {
     let randomColor = Math.floor(Math.random() * candyColors.length);
     return candyColors[randomColor];
 }
-
