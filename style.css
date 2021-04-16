@@ -1,12 +1,30 @@
 /* colour scheme variables */
 :root {
     --background: cornflowerblue;
-    --overlay: rgba(255, 255, 255, 0.3);
+    --overlay: lightskyblue;
     --title: black;
     --text: midnightblue;
     --accent: indigo;
 }
 
+/* fonts */
+h1 {
+    font-family: Impact, Charcoal, sans-serif;
+    font-size: 30px;
+    color: var(--title);
+    font-weight: 400;
+    font-variant: small-caps;
+}
+
+div.info>div>h1:first-child{
+    margin-top: -15%;
+    padding: 0 5px;
+    max-width: 50% ;
+    align-items: center;
+    background-color: var(--overlay);
+}
+
+/* Main layout*/
 body {
     display: flex;
     flex-direction: row;
@@ -24,15 +42,6 @@ body>* {
     background: var(--overlay);
 }
 
-/* fonts */
-h1 {
-    font-family: Impact, Charcoal, sans-serif;
-    font-size: 39px;
-    color: var(--title);
-    font-weight: 400;
-    font-variant: small-caps;
-}
-
 /* Game info */
 div.info {
     /* standard width so divs scale equally */
@@ -48,8 +57,19 @@ div.info {
     border: 5px solid var(--accent);
 }
 
-div.info div {
+div.info>div {
+    border: 5px groove var(--accent);
+    border-radius: 15px;
 
+    padding: 5px 10px 5px 5px;
+
+    margin-top: 40px;
+}
+
+div.info>div>div {
+    max-height: 100px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Game grid */

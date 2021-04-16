@@ -12,3 +12,4 @@ Resources:
 * [Box Shadow generator](https://html-css-js.com/css/generator/box-shadow/)
 * [Cubic bezier generator](https://cubic-bezier.com/)
 * [FlexBox Cheat Sheet](https://flexbox.malven.co/)
+* [Semantic versioning](https://semver.org/)
