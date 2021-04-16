@@ -1,4 +1,5 @@
 const width = 8;
+const height = 8
 
 const candyColors = [
     `red`,
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     scoreDisplay = document.getElementById(`score`);
 
     // Create board
-    createBoard(width, grid);
+    createBoard(width, height, grid);
 
     // set timer
     // maybe let this trigger only when stuff would change?
@@ -40,25 +41,19 @@ function onStatusChanged() {
 
 // Idea: width + height
 // Based on screen dimensions?
-function createBoard(width, grid) {
-    //Rows
-    for (let i = 0; i < width; i++){
-        // let row = [];
-
-        // Squares in row
-        for (let j = 0; j < width; j++)
+function createBoard(width, height, grid) {
+    for (let row = 0; row < height; row++){
+        for (let column = 0; column < width; column++)
         {
             let square = document.createElement(`div`);
 
-            // Give square a random background color from the array
+            // Shapes empty at start
             square.className = `blank`;
 
-            // Draggable - change to not show?
             square.setAttribute(`draggable`, `true`);
 
-            // id = row / column
-            let id = i * 100 + j;
-            square.setAttribute(`id`, id.toString());
+            let id = {row: row, column: column};
+            square.setAttribute(`id`, JSON.stringify(id));
 
             // Event Listeners
             square.addEventListener(`dragstart`, dragStart)
@@ -78,31 +73,32 @@ function dragStart() {
     squareDragged = this;
 }
 function dragLeave() {
-
+    // Needs to be defined
 }
 function dragDrop() {
     squareReplaced = this;
-    let idDragged = parseInt(squareDragged.id);
+    let idDragged = JSON.parse(squareDragged.id);
+    let draggedTo = JSON.parse(squareReplaced.id);
 
-    // Positions the square can be dragged to
+    // Create list of valid moves
     let validMoves = [
-        // left and right
-        idDragged - 1,
-        idDragged + 1,
-        // above and below
-        idDragged + 100,
-        idDragged - 100
+        {row: idDragged.row + 1, column: idDragged.column},
+        {row: idDragged.row - 1, column: idDragged.column},
+        {row: idDragged.row, column: idDragged.column + 1},
+        {row: idDragged.row, column: idDragged.column - 1}
     ];
 
-    // If we execute on drop
-    // No need to check if there is an actual item being selected
-    if (validMoves.includes(parseInt(squareReplaced.id))) {
-        // Switch colours
+    let isValidMove = false;
+
+    for (let i = 0; i < 4 && !isValidMove; i++) {
+        isValidMove = draggedTo.row === validMoves[i].row && draggedTo.column === validMoves[i].column;
+    }
+
+    // Switch colors
+    if (isValidMove) {
         let savedColour = squareDragged.className;
         squareDragged.className = squareReplaced.className;
         squareReplaced.className = savedColour;
-    } else {
-        console.log(`Invalid move`);
     }
 }
 function dragOver(e) {
@@ -114,31 +110,24 @@ function dragEnter(e) {
 
 // Drop items
 function moveDown() {
-    // we want the blocks to fall row by row
-    // but we don't want matches to trigger while blocks are falling
-    // --> while
+    // Check if the grid contains empty spaces
     let isFull = true;
-
-    // Get all squares in DOM
     for (let item of document.querySelectorAll(`div.grid div`)) {
-        // If no background
         if (item.className === `blank`) {
-            // grid contains blanks
             isFull = false;
         }
     }
 
     // for all rows except top
-    for (let i = width - 1; i > 0; i--) {
-        // for all squares in this row
-        for (let j = 0; j < width; j++){
-            let checkingId = i * 100 + j;
-            let checkingSquare = document.getElementById((checkingId).toString());
+    for (let row = height - 1; row > 0; row--) {
+        for (let column = 0; column < width; column++){
+            // Get shape in this position
+            let checkingSquare = getShape(row, column);
 
             // If square is empty
             if (checkingSquare.className === `blank`) {
                 // Get square above
-                let fallingSquare = document.getElementById((checkingId -100).toString());
+                let fallingSquare = getShape(row - 1, column);
 
                 // copy color of square above
                 checkingSquare.className = fallingSquare.className;
@@ -150,8 +139,8 @@ function moveDown() {
     }
 
     // for top row only
-    for (let  j = 0; j < width; j++) {
-        let checkingSquare = document.getElementById((j).toString());
+    for (let  column = 0; column < width; column++) {
+        let checkingSquare = getShape(0, column);
 
         // If the square has no bg
         if (checkingSquare.className === `blank`) {
@@ -167,26 +156,25 @@ function checkMatches() {
     // for lengths from 6 to 3 (starting at largest)
     for (let checkingLength = 6; checkingLength > 2; checkingLength-- ) {
         // for every row
-        for (let rowNumber = 0; rowNumber < width; rowNumber++) {
+        for (let row = 0; row < height; row++) {
             // for every square in this row
-            for (let columnNumber = 0; columnNumber < width; columnNumber++) {
+            for (let column = 0; column < width; column++) {
                 // Get the id for this square
-                let checkingId = rowNumber * 100 + columnNumber;
+                let checkingId = {row: row, column: column};
 
                 // if our row number is greater than the length we're checking minus two
                 // check for matches in de squares above
-                if (rowNumber > checkingLength - 2) {
+                if (row > checkingLength - 2) {
                     checkForColumn(checkingId, checkingLength);
                 }
 
                 // if our column number is greater than the length we're checking minus two
                 // check for matches in de squares to the left
-                if (columnNumber > checkingLength - 2){
+                if (column > checkingLength - 2){
                     checkForRow(checkingId, checkingLength);
                 }
             }
         }
-
     }
 }
 
@@ -196,15 +184,15 @@ function checkForRow(id, amountToCheck) {
 
     // Add relevant squares
     for (let i = 0; i < amountToCheck; i++) {
-        rowArray.push(document.getElementById((id - i).toString()));
+        rowArray.push(getShape(id.row, id.column - i));
     }
 
     // If colors match
     // Check on other axis if all the colors in the column match
     if (isSameColor(rowArray)) {
         rowArray.forEach(function (itemChecked){
-            let secondaryArray = secondaryColumn(parseInt(itemChecked.id), itemChecked.className);
-
+            let secondaryArray = secondaryColumn(JSON.parse(itemChecked.id), itemChecked.className);
+            // Turn this into lambda function?
             secondaryArray.forEach(function(itemAdded){
                 rowArray.push(itemAdded);
             })
@@ -219,14 +207,13 @@ function checkForColumn(id, amountToCheck) {
 
     // Add relevant squares
     for (let i = 0; i < amountToCheck; i++) {
-        columnArray.push(document.getElementById((id - (100 * i)).toString()));
+        columnArray.push(getShape(id.row - i, id.column));
     }
 
     // Check on other axis if all the colors in the column match
     if (isSameColor(columnArray)) {
         columnArray.forEach(function (itemChecked){
-            let secondaryArray = secondaryRow(parseInt(itemChecked.id), itemChecked.className);
-
+            let secondaryArray = secondaryRow(itemChecked.id, itemChecked.className);
             secondaryArray.forEach(function(itemAdded){
                 columnArray.push(itemAdded);
             })
@@ -244,46 +231,39 @@ function secondaryRow(id, color) {
 
     let array = [];
 
-    let distanceFromAxis = -1;
+    let distance = 1;
 
-    // As long as there are matches possible on the left
-    while (canMatchLeft) {
-        // get the square to the left of the leftmost square
-        let checkingId = id + distanceFromAxis;
-        let checkingSquare = document.getElementById(checkingId.toString());
+    while (canMatchLeft || canMatchRight) {
+        distance++;
 
-        // if our square is not null and has the correct color
-        if (checkingSquare && checkingSquare.className === color){
-            // Add square to new array
-            array.push(checkingSquare);
+        // As long as there are matches possible on the left
+        if (canMatchLeft) {
+            // get the square to the left of the leftmost square
+            let checkingSquare = getShape(id.row, id.column - distance);
 
-            // move one further to the left in the next iteration
-            distanceFromAxis--;
-        } else {
-            // Stop looking to the left
-            canMatchLeft = false;
+            // if our square is not null and has the correct color
+            if (checkingSquare && checkingSquare.className === color){
+                // Add square to new array
+                array.push(checkingSquare);
+            } else {
+                // Stop looking to the left
+                canMatchLeft = false;
+            }
         }
-    }
 
-    // Move to the right
-    distanceFromAxis = 1;
+        // As long as there are matches possible on the right
+        if (canMatchRight) {
+            // get the square to the right of the rightmost square
+            let checkingSquare = getShape(id.row, id.column + distance);
 
-    // As long as there are matches possible on the right
-    while (canMatchRight) {
-        // get the square to the right of the leftmost square
-        let checkingId = id + distanceFromAxis;
-        let checkingSquare = document.getElementById(checkingId.toString());
-
-        // if our square is not null and has the correct color
-        if (checkingSquare && checkingSquare.className === color) {
-            // Add square to new array
-            array.push(checkingSquare);
-
-            // move one further to the left in the next iteration
-            distanceFromAxis++;
-        } else {
-            // Stop looking to the left
-            canMatchRight = false;
+            // if our square is not null and has the correct color
+            if (checkingSquare && checkingSquare.className === color) {
+                // Add square to new array
+                array.push(checkingSquare);
+            } else {
+                // Stop looking to the left
+                canMatchRight = false;
+            }
         }
     }
 
@@ -301,46 +281,40 @@ function secondaryColumn(id, color) {
 
     let array = [];
 
-    let distanceFromAxis = -100;
+    let distance = 0;
 
-    // As long as there are matches possible on the left
-    while (canMatchBottom) {
-        // get the square to the left of the leftmost square
-        let checkingId = id + distanceFromAxis;
-        let checkingSquare = document.getElementById(checkingId.toString());
+    while (canMatchBottom || canMatchTop) {
+        // move one further away from the center in either direction
+        distance++;
 
-        // if our square is not null and has the correct color
-        if (checkingSquare && checkingSquare.className === color){
-            // Add square to new array
-            array.push(checkingSquare);
+        // As long as there are matches possible on the left
+        if (canMatchBottom) {
+            // get the square to the left of the leftmost square
+            let checkingSquare = getShape(id.row - distance, id.column);
 
-            // move one further to the left in the next iteration
-            distanceFromAxis -= 100;
-        } else {
-            // Stop looking to the left
-            canMatchBottom = false;
+            // if our square is not null and has the correct color
+            if (checkingSquare && checkingSquare.className === color){
+                // Add square to new array
+                array.push(checkingSquare);
+            } else {
+                // Stop looking to the left
+                canMatchBottom = false;
+            }
         }
-    }
 
-    // Move to the right
-    distanceFromAxis = 100;
+        // As long as there are matches possible on the right
+        if (canMatchTop) {
+            // get the square to the right of the leftmost square
+            let checkingSquare = getShape(id.row + distance, id.column);
 
-    // As long as there are matches possible on the right
-    while (canMatchTop) {
-        // get the square to the right of the leftmost square
-        let checkingId = id + distanceFromAxis;
-        let checkingSquare = document.getElementById(checkingId.toString());
-
-        // if our square is not null and has the correct color
-        if (checkingSquare && checkingSquare.className === color) {
-            // Add square to new array
-            array.push(checkingSquare);
-
-            // move one further to the left in the next iteration
-            distanceFromAxis += 100;
-        } else {
-            // Stop looking to the left
-            canMatchTop = false;
+            // if our square is not null and has the correct color
+            if (checkingSquare && checkingSquare.className === color) {
+                // Add square to new array
+                array.push(checkingSquare);
+            } else {
+                // Stop looking to the left
+                canMatchTop = false;
+            }
         }
     }
 
@@ -363,7 +337,6 @@ function isSameColor(array) {
     }
 
     return isMatch;
-
 }
 
 // executes scoring and removing matched squares
@@ -380,4 +353,11 @@ function onColorMatch(array) {
 function randomColor() {
     let randomColor = Math.floor(Math.random() * candyColors.length);
     return candyColors[randomColor];
+}
+
+function getShape(row, column) {
+    // Get shape in this position
+    let id = {row: row, column: column};
+    let shape = document.getElementById(JSON.stringify(id));
+    return shape;
 }
