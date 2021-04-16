@@ -41,7 +41,6 @@ function onStatusChanged() {
 // Idea: width + height
 // Based on screen dimensions?
 function createBoard(width, grid) {
-
     //Rows
     for (let i = 0; i < width; i++){
         // let row = [];
@@ -52,7 +51,7 @@ function createBoard(width, grid) {
             let square = document.createElement(`div`);
 
             // Give square a random background color from the array
-            square.className = randomColor();
+            square.className = `blank`;
 
             // Draggable - change to not show?
             square.setAttribute(`draggable`, `true`);
