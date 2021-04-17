@@ -102,13 +102,13 @@ function dragDrop() {
 
     if (isValidMove) {
         swapColor(squareDragged, squareReplaced);
-    }
 
-    let isCreatingMatch = checkIfMatch(JSON.parse(squareDragged.id)) || checkIfMatch(JSON.parse(squareReplaced.id))
+        let isCreatingMatch = checkIfMatch(JSON.parse(squareDragged.id)) || checkIfMatch(JSON.parse(squareReplaced.id))
 
-    // Maybe add animation or something to indicate that there's no match?
-    if (!isCreatingMatch) {
-        swapColor(squareDragged, squareReplaced);
+        // Maybe add animation or something to indicate that there's no match?
+        if (!isCreatingMatch) {
+            swapColor(squareDragged, squareReplaced);
+        }
     }
 }
 
