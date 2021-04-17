@@ -4,21 +4,21 @@ const candyColors = [`red`, `yellow`, `orange`, `purple`, `green`, `blue`]
 
 let grid;
 let scoreDisplay;
-let timerDisplay;
-let timeOut = 200;
+let countdownDisplay;
+let tick = 200;
 
 let score = 0;
-let timer = -100000;
+let countdown = -100000;
 
-let squareDragged;
-let squareReplaced;
+let shapeDragged;
+let shapeReplaced;
 
 // When page loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
     grid = document.querySelector(`.grid`);
     scoreDisplay = document.getElementById(`score`);
-    timerDisplay = document.getElementById(`timer`);
+    countdownDisplay = document.getElementById(`timer`);
 
     createBoard(width, height, grid);
 
@@ -26,15 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // maybe let this trigger only when stuff would change?
     window.setInterval(function (){
         onStatusChanged();
-        updateTimer();
-    }, timeOut)
+        updateCountdown();
+    }, tick)
 })
 
 function onStatusChanged() {
     let boardFilled = moveDown();
 
-    if (boardFilled && timer === -100000) {
-        timer = 60000;
+    if (boardFilled && countdown === -100000) {
+        countdown = 60000;
     }
     if (boardFilled) {
         checkMatches();
@@ -45,47 +45,47 @@ function createBoard(width, height, grid) {
     for (let row = 0; row < height; row++){
         for (let column = 0; column < width; column++)
         {
-            let square = document.createElement(`div`);
+            let shape = document.createElement(`div`);
 
             // Shapes empty at start
-            square.className = `blank`;
+            shape.className = `blank`;
 
-            square.setAttribute(`draggable`, `true`);
+            shape.setAttribute(`draggable`, `true`);
 
             let id = {row: row, column: column};
-            square.setAttribute(`id`, JSON.stringify(id));
+            shape.setAttribute(`id`, JSON.stringify(id));
 
             // Event Listeners
-            square.addEventListener(`dragstart`, dragStart)
-            square.addEventListener(`dragover`, dragOver)
-            square.addEventListener(`dragenter`, dragEnter)
-            square.addEventListener(`dragleave`, dragLeave)
-            square.addEventListener(`drop`, dragDrop)
+            shape.addEventListener(`dragstart`, dragStart)
+            shape.addEventListener(`dragover`, dragOver)
+            shape.addEventListener(`dragenter`, dragEnter)
+            shape.addEventListener(`dragleave`, dragLeave)
+            shape.addEventListener(`drop`, dragDrop)
 
-            // put square in grid and in array
-            grid.appendChild(square);
+            // put shape in grid
+            grid.appendChild(shape);
         }
     }
 }
 
 // Swapping functions
 function dragStart() {
-    squareDragged = this;
+    shapeDragged = this;
 }
 function dragLeave() {
     // Needs to be defined
 }
 function dragDrop() {
-    squareReplaced = this;
-    let idDragged = JSON.parse(squareDragged.id);
-    let draggedTo = JSON.parse(squareReplaced.id);
+    shapeReplaced = this;
+    let idDragged = JSON.parse(shapeDragged.id);
+    let draggedTo = JSON.parse(shapeReplaced.id);
 
 
 
     // Create list of valid moves
     // No valid moves if timer is not running
     let validMoves;
-    if (timer > 0) {
+    if (countdown > 0) {
         validMoves = [
             {row: idDragged.row + 1, column: idDragged.column},
             {row: idDragged.row - 1, column: idDragged.column},
@@ -101,13 +101,21 @@ function dragDrop() {
     }
 
     if (isValidMove) {
-        swapColor(squareDragged, squareReplaced);
+        swapColor(shapeDragged, shapeReplaced);
 
-        let isCreatingMatch = checkIfMatch(JSON.parse(squareDragged.id)) || checkIfMatch(JSON.parse(squareReplaced.id))
+        let isCreatingMatch;
 
+        // Resolve top swap first
+        if (idDragged.row < draggedTo.row) {
+            isCreatingMatch = checkIfMatch(idDragged) || checkIfMatch(draggedTo);
+        } else {
+            isCreatingMatch = checkIfMatch(draggedTo) || checkIfMatch(idDragged);
+        }
+
+        // Swap colors back if there is no match
         // Maybe add animation or something to indicate that there's no match?
         if (!isCreatingMatch) {
-            swapColor(squareDragged, squareReplaced);
+            swapColor(shapeDragged, shapeReplaced);
         }
     }
 }
@@ -133,29 +141,29 @@ function moveDown() {
     for (let row = height - 1; row > 0; row--) {
         for (let column = 0; column < width; column++){
             // Get shape in this position
-            let checkingSquare = getShape(row, column);
+            let checkingShape = getShape(row, column);
 
-            // If square is empty
-            if (checkingSquare.className === `blank`) {
-                // Get square above
-                let fallingSquare = getShape(row - 1, column);
+            // If shape is empty
+            if (checkingShape.className === `blank`) {
+                // Get shape above
+                let fallingShape = getShape(row - 1, column);
 
-                // copy color of square above
-                checkingSquare.className = fallingSquare.className;
+                // copy color of shape above
+                checkingShape.className = fallingShape.className;
 
-                // empty square above
-                fallingSquare.className= `blank`;
+                // empty shape above
+                fallingShape.className= `blank`;
             }
         }
     }
 
     // for top row only
     for (let  column = 0; column < width; column++) {
-        let checkingSquare = getShape(0, column);
+        let checkingShape = getShape(0, column);
 
-        // If the square has no bg
-        if (checkingSquare.className === `blank`) {
-            checkingSquare.className = randomColor();
+        // If the shape has no bg
+        if (checkingShape.className === `blank`) {
+            checkingShape.className = randomColor();
         }
     }
 
@@ -166,13 +174,13 @@ function moveDown() {
 function checkMatches() {
     for (let row = 0; row < height; row++) {
         for (let column = 0; column < width; column++) {
-            // Id for the currently selected square
+            // Id for the currently selected shape
             let checkingId = {row: row, column: column};
 
-            // find the color of the currently selected square
+            // find the color of the currently selected shape
             let color = getShape(row, column).className;
 
-            // if the square hasn't already been cleared
+            // if the shape hasn't already been cleared
             if (color !== `blank`) {
                 // check for matches
                 checkIfMatch(checkingId);
@@ -199,6 +207,7 @@ function checkIfMatch(idObject) {
             if (secondaryArray.length > 1){
                 secondaryArray.forEach(x => rowArray.push(x));
             }
+            secondaryArray = [];
         });
 
         // add all valid matches to the ultimate array
@@ -215,6 +224,7 @@ function checkIfMatch(idObject) {
             if (secondaryArray.length > 1){
                 secondaryArray.forEach(x => columnArray.push(x));
             }
+            secondaryArray = [];
         });
 
         // add all valid matches to the ultimate array
@@ -297,13 +307,13 @@ function isVerticalMatch(array, idObject, distance) {
     }
 }
 
-// executes scoring and removing matched squares
+// executes scoring and removing matched shapes
 function onColorMatch(array) {
     score += Math.floor((array.length / 2.0) * (1 + array.length));
     scoreDisplay.innerHTML = score;
 
-    if (timer > 0) {
-        timer += array.length * 50000 / score;
+    if (countdown > 0) {
+        countdown += array.length * 50000 / score;
     }
 
     // remove bg
@@ -328,11 +338,11 @@ function getShape(row, column) {
     return document.getElementById(JSON.stringify(id));
 }
 
-function updateTimer() {
+function updateCountdown() {
     // If the counter has not hit zero
-    if (timer > 0){
-        timer -= timeOut;
-        timerDisplay.innerHTML = Math.ceil(timer / 1000);
+    if (countdown > 0){
+        countdown -= tick;
+        countdownDisplay.innerHTML = Math.ceil(countdown / 1000);
     } else  {
         window.clearInterval();
     }
