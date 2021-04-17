@@ -9,6 +9,7 @@ let tick = 200;
 
 let score = 0;
 let countdown = -100000;
+let isCountdownActive = false;
 
 let shapeDragged;
 let shapeReplaced;
@@ -33,8 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function onStatusChanged() {
     let boardFilled = moveDown();
 
-    if (boardFilled && countdown === -100000) {
+    if (boardFilled && !isCountdownActive) {
         countdown = 60000;
+        isCountdownActive = true;
     }
     if (boardFilled) {
         checkMatches();
@@ -340,10 +342,24 @@ function getShape(row, column) {
 
 function updateCountdown() {
     // If the counter has not hit zero
-    if (countdown > 0){
-        countdown -= tick;
-        countdownDisplay.innerHTML = Math.ceil(countdown / 1000);
-    } else  {
-        window.clearInterval();
+    if (isCountdownActive) {
+        if (countdown > 0){
+            countdown -= tick;
+            countdownDisplay.innerHTML = Math.ceil(countdown / 1000);
+        } else  {
+            window.clearInterval();
+            isCountdownActive = false;
+            showGameOver();
+        }
     }
+
+}
+
+function showGameOver() {
+    let gameOver = document.createElement(`div`);
+    gameOver.innerHTML = `Time's up! Congratulations, you scored ${score} points! Feel free to refresh the page if you'd like to play again.`;
+    gameOver.className = `game-over`;
+
+    let container = document.querySelector(`body`);
+    container.appendChild(gameOver);
 }
