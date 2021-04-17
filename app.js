@@ -4,16 +4,21 @@ const candyColors = [`red`, `yellow`, `orange`, `purple`, `green`, `blue`]
 
 let grid;
 let scoreDisplay;
+let timerDisplay;
+let timeOut = 200;
+
+let score = 0;
+let timer = -100000;
 
 let squareDragged;
 let squareReplaced;
-let score = 0;
 
 // When page loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
     grid = document.querySelector(`.grid`);
     scoreDisplay = document.getElementById(`score`);
+    timerDisplay = document.getElementById(`timer`);
 
     createBoard(width, height, grid);
 
@@ -21,11 +26,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // maybe let this trigger only when stuff would change?
     window.setInterval(function (){
         onStatusChanged();
-    }, 200)
+        updateTimer();
+    }, timeOut)
 })
 
 function onStatusChanged() {
     let boardFilled = moveDown();
+
+    if (boardFilled && timer === -100000) {
+        timer = 60000;
+    }
     if (boardFilled) {
         checkMatches();
     }
@@ -70,13 +80,19 @@ function dragDrop() {
     let idDragged = JSON.parse(squareDragged.id);
     let draggedTo = JSON.parse(squareReplaced.id);
 
+
+
     // Create list of valid moves
-    let validMoves = [
-        {row: idDragged.row + 1, column: idDragged.column},
-        {row: idDragged.row - 1, column: idDragged.column},
-        {row: idDragged.row, column: idDragged.column + 1},
-        {row: idDragged.row, column: idDragged.column - 1}
-    ];
+    // No valid moves if timer is not running
+    let validMoves;
+    if (timer > 0) {
+        validMoves = [
+            {row: idDragged.row + 1, column: idDragged.column},
+            {row: idDragged.row - 1, column: idDragged.column},
+            {row: idDragged.row, column: idDragged.column + 1},
+            {row: idDragged.row, column: idDragged.column - 1}
+        ];
+    }
 
     let isValidMove = false;
 
@@ -274,6 +290,10 @@ function onColorMatch(array) {
     score += Math.floor((array.length / 2.0) * (1 + array.length));
     scoreDisplay.innerHTML = score;
 
+    if (timer > 0) {
+        timer += array.length * 50000 / score;
+    }
+
     // remove bg
     array.forEach(shape => shape.className = `blank`)
 }
@@ -294,4 +314,14 @@ function swapColor(shapeA, shapeB) {
 function getShape(row, column) {
     let id = {row: row, column: column};
     return document.getElementById(JSON.stringify(id));
+}
+
+function updateTimer() {
+    // If the counter has not hit zero
+    if (timer > 0){
+        timer -= timeOut;
+        timerDisplay.innerHTML = Math.ceil(timer / 1000);
+    } else  {
+        window.clearInterval();
+    }
 }
