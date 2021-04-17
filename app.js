@@ -193,7 +193,13 @@ function checkIfMatch(idObject) {
     if (rowArray.length > 1) {
         // Check the horizontal array for vertical matches
         // if there are valid matches, add them to the array
-        rowArray.forEach(x => checkVerticalMatch(rowArray, JSON.parse(x.id)));
+        let secondaryArray = [];
+        rowArray.forEach(function (x) {
+            checkVerticalMatch(secondaryArray, JSON.parse(x.id));
+            if (secondaryArray.length > 1){
+                secondaryArray.forEach(x => rowArray.push(x));
+            }
+        });
 
         // add all valid matches to the ultimate array
         rowArray.forEach(x => allMatches.push(x));
@@ -203,7 +209,13 @@ function checkIfMatch(idObject) {
     if (columnArray.length > 1) {
         // Check the horizontal array for vertical matches
         // if there are valid matches, add them to the array
-        columnArray.forEach(x => checkHorizontalMatch(columnArray, JSON.parse(x.id)));
+        let secondaryArray = [];
+        columnArray.forEach(function (x) {
+            checkHorizontalMatch(secondaryArray, JSON.parse(x.id));
+            if (secondaryArray.length > 1){
+                secondaryArray.forEach(x => columnArray.push(x));
+            }
+        });
 
         // add all valid matches to the ultimate array
         columnArray.forEach(x => allMatches.push(x));
