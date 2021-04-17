@@ -113,11 +113,11 @@ Game grid and shape styling
 
 /* General styling */
 div.grid div:empty {
-    height: 70%;
-    width: 70%;
+    height: 80%;
+    width: 80%;
 
     /* Drop transition animation */
-    transition: background-color 1s cubic-bezier(0,2.25,0,0), height .1s ease, margin-top .8s ease-out;
+    transition: background-color 1s cubic-bezier(0,2.25,0,0), height .8s ease, margin-top .1s ease-out;
 }
 
 div.grid div.red,
@@ -177,4 +177,13 @@ div.grid div.blank {
     /* Explosion */
     visibility: hidden;
     background-color: white;
+}
+
+/*
+Animations
+*/
+
+@keyframes no-match {
+    0%      {background-color: black}
+    100%     {background-color: red}
 }

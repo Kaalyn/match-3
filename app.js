@@ -1,14 +1,6 @@
 const width = 8;
 const height = 8
-
-const candyColors = [
-    `red`,
-    `yellow`,
-    `orange`,
-    `purple`,
-    `green`,
-    `blue`
-]
+const candyColors = [`red`, `yellow`, `orange`, `purple`, `green`, `blue`]
 
 let grid;
 let scoreDisplay;
@@ -17,12 +9,12 @@ let squareDragged;
 let squareReplaced;
 let score = 0;
 
+// When page loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // When page loaded
+    // Get DOM elements
     grid = document.querySelector(`.grid`);
     scoreDisplay = document.getElementById(`score`);
 
-    // Create board
     createBoard(width, height, grid);
 
     // set timer
@@ -39,8 +31,6 @@ function onStatusChanged() {
     }
 }
 
-// Idea: width + height
-// Based on screen dimensions?
 function createBoard(width, height, grid) {
     for (let row = 0; row < height; row++){
         for (let column = 0; column < width; column++)
@@ -94,13 +84,18 @@ function dragDrop() {
         isValidMove = draggedTo.row === validMoves[i].row && draggedTo.column === validMoves[i].column;
     }
 
-    // Switch colors
     if (isValidMove) {
-        let savedColour = squareDragged.className;
-        squareDragged.className = squareReplaced.className;
-        squareReplaced.className = savedColour;
+        swapColor(squareDragged, squareReplaced);
+    }
+
+    let isCreatingMatch = checkIfMatch(JSON.parse(squareDragged.id)) || checkIfMatch(JSON.parse(squareReplaced.id))
+
+    // Maybe add animation or something to indicate that there's no match?
+    if (!isCreatingMatch) {
+        swapColor(squareDragged, squareReplaced);
     }
 }
+
 function dragOver(e) {
     e.preventDefault();
 }
@@ -151,192 +146,127 @@ function moveDown() {
     return isFull;
 }
 
-// Check for matches
+// Iterate over grid to check for matches
 function checkMatches() {
-    // for lengths from 6 to 3 (starting at largest)
-    for (let checkingLength = 6; checkingLength > 2; checkingLength-- ) {
-        // for every row
-        for (let row = 0; row < height; row++) {
-            // for every square in this row
-            for (let column = 0; column < width; column++) {
-                // Get the id for this square
-                let checkingId = {row: row, column: column};
+    for (let row = 0; row < height; row++) {
+        for (let column = 0; column < width; column++) {
+            // Id for the currently selected square
+            let checkingId = {row: row, column: column};
 
-                // if our row number is greater than the length we're checking minus two
-                // check for matches in de squares above
-                if (row > checkingLength - 2) {
-                    checkForColumn(checkingId, checkingLength);
-                }
+            // find the color of the currently selected square
+            let color = getShape(row, column).className;
 
-                // if our column number is greater than the length we're checking minus two
-                // check for matches in de squares to the left
-                if (column > checkingLength - 2){
-                    checkForRow(checkingId, checkingLength);
-                }
+            // if the square hasn't already been cleared
+            if (color !== `blank`) {
+                // check for matches
+                checkIfMatch(checkingId);
             }
         }
     }
 }
 
-function checkForRow(id, amountToCheck) {
-    // empty array to store ID's in
+// Check if a shape is part of a valid match
+// Multiple directions with recursion maybe? This can be done better
+function checkIfMatch(idObject) {
+    // Arrays to store matching shapes
+    let allMatches = [];
     let rowArray = [];
-
-    // Add relevant squares
-    for (let i = 0; i < amountToCheck; i++) {
-        rowArray.push(getShape(id.row, id.column - i));
-    }
-
-    // If colors match
-    // Check on other axis if all the colors in the column match
-    if (isSameColor(rowArray)) {
-        rowArray.forEach(function (itemChecked){
-            let secondaryArray = secondaryColumn(JSON.parse(itemChecked.id), itemChecked.className);
-            // Turn this into lambda function?
-            secondaryArray.forEach(function(itemAdded){
-                rowArray.push(itemAdded);
-            })
-        })
-        onColorMatch(rowArray);
-    }
-}
-
-function checkForColumn(id, amountToCheck) {
-    // empty array to store ID's in
     let columnArray = [];
 
-    // Add relevant squares
-    for (let i = 0; i < amountToCheck; i++) {
-        columnArray.push(getShape(id.row - i, id.column));
+    checkHorizontalMatch(rowArray, idObject);
+    if (rowArray.length > 1) {
+        // Check the horizontal array for vertical matches
+        // if there are valid matches, add them to the array
+        rowArray.forEach(x => checkVerticalMatch(rowArray, JSON.parse(x.id)));
+
+        // add all valid matches to the ultimate array
+        rowArray.forEach(x => allMatches.push(x));
     }
 
-    // Check on other axis if all the colors in the column match
-    if (isSameColor(columnArray)) {
-        columnArray.forEach(function (itemChecked){
-            let secondaryArray = secondaryRow(itemChecked.id, itemChecked.className);
-            secondaryArray.forEach(function(itemAdded){
-                columnArray.push(itemAdded);
-            })
-        })
-        onColorMatch(columnArray);
+    checkVerticalMatch(columnArray, idObject);
+    if (columnArray.length > 1) {
+        // Check the horizontal array for vertical matches
+        // if there are valid matches, add them to the array
+        columnArray.forEach(x => checkHorizontalMatch(columnArray, JSON.parse(x.id)));
+
+        // add all valid matches to the ultimate array
+        columnArray.forEach(x => allMatches.push(x));
+    }
+
+    // If there are shapes matched
+    if (allMatches.length) {
+        // First add the original shape
+        allMatches.push(getShape(idObject.row, idObject.column));
+
+        // Then remove all candies in the array
+        onColorMatch(allMatches);
+        return true;
+    } else {
+        return false;
     }
 }
 
-// Check for secondary axis
-// CODE DUPLICATION!!!
-function secondaryRow(id, color) {
+// horizontal/vertical matching could be done together?
+// Iterates over shapes to the left/right for a match
+function checkHorizontalMatch(array, idObject) {
     // Booleans to store whether we can still match on the left/right
     let canMatchLeft = true;
     let canMatchRight = true;
 
-    let array = [];
-
-    let distance = 1;
-
-    while (canMatchLeft || canMatchRight) {
-        distance++;
-
-        // As long as there are matches possible on the left
-        if (canMatchLeft) {
-            // get the square to the left of the leftmost square
-            let checkingSquare = getShape(id.row, id.column - distance);
-
-            // if our square is not null and has the correct color
-            if (checkingSquare && checkingSquare.className === color){
-                // Add square to new array
-                array.push(checkingSquare);
-            } else {
-                // Stop looking to the left
-                canMatchLeft = false;
-            }
-        }
-
-        // As long as there are matches possible on the right
-        if (canMatchRight) {
-            // get the square to the right of the rightmost square
-            let checkingSquare = getShape(id.row, id.column + distance);
-
-            // if our square is not null and has the correct color
-            if (checkingSquare && checkingSquare.className === color) {
-                // Add square to new array
-                array.push(checkingSquare);
-            } else {
-                // Stop looking to the left
-                canMatchRight = false;
-            }
-        }
+    // Check for matches to the left
+    for (let i = -1; canMatchLeft; i--) {
+        canMatchLeft = isHorizontalMatch(array, idObject, i);
     }
 
-    if (array.length > 1 ) {
-        return array;
-    } else {
-        return [];
+    // Check for matches to the right
+    for (let i = 1; canMatchRight; i++) {
+        canMatchRight = isHorizontalMatch(array, idObject, i)
     }
 }
 
-function secondaryColumn(id, color) {
-    // Booleans to store whether we can still match on the top/bottom
-    let canMatchBottom = true;
+// Iterates over shapes on the top/bottom for a match
+function checkVerticalMatch(array, idObject) {
+    // Booleans to store whether we can still match on the left/right/top/bottom
     let canMatchTop = true;
+    let canMatchBottom = true;
 
-    let array = [];
-
-    let distance = 0;
-
-    while (canMatchBottom || canMatchTop) {
-        // move one further away from the center in either direction
-        distance++;
-
-        // As long as there are matches possible on the left
-        if (canMatchBottom) {
-            // get the square to the left of the leftmost square
-            let checkingSquare = getShape(id.row - distance, id.column);
-
-            // if our square is not null and has the correct color
-            if (checkingSquare && checkingSquare.className === color){
-                // Add square to new array
-                array.push(checkingSquare);
-            } else {
-                // Stop looking to the left
-                canMatchBottom = false;
-            }
-        }
-
-        // As long as there are matches possible on the right
-        if (canMatchTop) {
-            // get the square to the right of the leftmost square
-            let checkingSquare = getShape(id.row + distance, id.column);
-
-            // if our square is not null and has the correct color
-            if (checkingSquare && checkingSquare.className === color) {
-                // Add square to new array
-                array.push(checkingSquare);
-            } else {
-                // Stop looking to the left
-                canMatchTop = false;
-            }
-        }
+    // Check for matches above
+    for (let i = -1; canMatchTop; i--) {
+        canMatchTop = isVerticalMatch(array, idObject, i);
     }
 
-    if (array.length > 1 ) {
-        return array;
-    } else {
-        return [];
+    // Check for matches below
+    for (let i = 1; canMatchBottom; i++) {
+        canMatchBottom = isVerticalMatch(array, idObject, i)
     }
 }
 
-// checks if al the squares in the array have the same color
-function isSameColor(array) {
-    // get the color of the first item in the array
-    let colorToCheck = array[0].className;
+// Adds shape to the array if it's a horizontal match
+function isHorizontalMatch(array, idObject, distance) {
+    let color = getShape(idObject.row, idObject.column).className;
+    let shape = getShape(idObject.row, idObject.column + distance);
 
-    let isMatch = false;
-
-    if (array.every(item => item.className === colorToCheck && colorToCheck !== `blank`)) {
-        isMatch = true;
+    // if our shape is not null and has the correct color
+    if (shape && shape.className === color){
+        array.push(shape);
+        return true;
+    } else {
+        return false;
     }
+}
 
-    return isMatch;
+// Adds shape to the array if it's a vertical match
+function isVerticalMatch(array, idObject, distance) {
+    let color = getShape(idObject.row, idObject.column).className;
+    let shape = getShape(idObject.row + distance, idObject.column);
+
+    // if our shape is not null and has the correct color
+    if (shape && shape.className === color){
+        array.push(shape);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 // executes scoring and removing matched squares
@@ -345,19 +275,23 @@ function onColorMatch(array) {
     scoreDisplay.innerHTML = score;
 
     // remove bg
-    array.forEach(item => {
-        item.className = `blank`;
-    })
+    array.forEach(shape => shape.className = `blank`)
 }
 
+// Returns a random color
 function randomColor() {
     let randomColor = Math.floor(Math.random() * candyColors.length);
     return candyColors[randomColor];
 }
 
+function swapColor(shapeA, shapeB) {
+    let savedColour = shapeA.className;
+    shapeA.className = shapeB.className;
+    shapeB.className = savedColour;
+}
+
+// Returns the div positioned at the coordinates
 function getShape(row, column) {
-    // Get shape in this position
     let id = {row: row, column: column};
-    let shape = document.getElementById(JSON.stringify(id));
-    return shape;
+    return document.getElementById(JSON.stringify(id));
 }
