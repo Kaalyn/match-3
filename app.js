@@ -7,8 +7,8 @@ let scoreDisplay;
 let countdownDisplay;
 let tick = 200;
 
-let score = 0;
-let countdown = -100000;
+let score;
+let countdown;
 let isCountdownActive = false;
 
 let shapeDragged;
@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     countdownDisplay = document.getElementById(`timer`);
 
     createBoard(width, height, grid);
+    countdown = 60000;
+    score = 0;
 
     // set timer
     // maybe let this trigger only when stuff would change?
@@ -34,10 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function onStatusChanged() {
     let boardFilled = moveDown();
 
-    if (boardFilled && !isCountdownActive) {
-        countdown = 60000;
-        isCountdownActive = true;
-    }
     if (boardFilled) {
         checkMatches();
     }
@@ -68,6 +66,8 @@ function createBoard(width, height, grid) {
             grid.appendChild(shape);
         }
     }
+
+    onStatusChanged();
 }
 
 // Swapping functions
