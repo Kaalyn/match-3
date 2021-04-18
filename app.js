@@ -8,8 +8,7 @@ let countdownDisplay;
 let tick = 200;
 
 let score;
-let countdown;
-let isCountdownActive = false;
+let countdown = 0;
 
 let shapeDragged;
 let shapeReplaced;
@@ -315,7 +314,9 @@ function onColorMatch(array) {
     scoreDisplay.innerHTML = score;
 
     if (countdown > 0) {
-        countdown += array.length * 50000 / score;
+        // If the score is lower than 100, add 2 seconds per candy
+        // Diminishing returns after that point
+        countdown += score > 250 ? (array.length * 125000 / score) : (array.length * 500) ;
     }
 
     // remove bg
@@ -342,17 +343,13 @@ function getShape(row, column) {
 
 function updateCountdown() {
     // If the counter has not hit zero
-    if (isCountdownActive) {
-        if (countdown > 0){
-            countdown -= tick;
-            countdownDisplay.innerHTML = Math.ceil(countdown / 1000);
-        } else  {
-            window.clearInterval();
-            isCountdownActive = false;
-            showGameOver();
-        }
+    if (countdown > 0){
+        countdown -= tick;
+        countdownDisplay.innerHTML = Math.ceil(countdown / 1000);
+    } else {
+        window.clearInterval();
+        showGameOver();
     }
-
 }
 
 function showGameOver() {
