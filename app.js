@@ -13,6 +13,95 @@ let countdown = 0;
 let shapeDragged;
 let shapeReplaced;
 
+let rows = [];
+let columns = [];
+
+class LineObject {
+    constructor(direction) {
+        this.ShapesInLine = [];
+        this.LineDirection = direction;
+
+        // Need to figure out how to do this dynamically
+        this.red = [];
+        this.yellow = [];
+        this.orange = [];
+        this.purple = [];
+        this.green = [];
+        this.blue = [];
+    }
+
+    // Get an array of all matching candies in this line
+    MatchesInGrid() {
+        this.#update();
+        let matchingArray = [];
+
+        for (let i = 0; i < candyColors.length; i++) {
+            if (this[candyColors[i]].length > 2) {
+                // check if the rows match
+                let matchesForColor = this.#checkConsecutive(this[candyColors[i]])
+                if (matchesForColor) {
+                    matchesForColor.forEach((shape) => matchingArray.push(shape));
+                }
+            }
+        }
+
+        // debugging
+        console.table(matchingArray);
+        return matchingArray;
+    }
+
+    // Check the matches for an array of the same color
+    #checkConsecutive = (colorArray) => {
+        let matchesInLine = [];
+
+        for (let firstShape = 0; firstShape < colorArray.length && !matchesInLine.includes(firstShape); firstShape++) {
+            let matchesForShape = [colorArray[firstShape]];
+            let firstShapeObject = JSON.parse(colorArray[firstShape].id);
+
+            let isMatchingPossible = true;
+            let distance = 1;
+
+            // Add matching candies to the array with matching candies for this shape
+            while(isMatchingPossible) {
+                let nextPossibleMatchId = this.LineDirection = `row` ?
+                    {row: firstShapeObject.row + distance, column: firstShapeObject.column} :
+                    {row: firstShapeObject.row, column: firstShapeObject.column + distance};
+                let nextPossibleMatch = document.getElementById(JSON.stringify(nextPossibleMatchId));
+
+                if (colorArray.includes(nextPossibleMatch)){
+                    matchesForShape.push(nextPossibleMatch);
+                    distance++;
+                } else {
+                    isMatchingPossible = false;
+                }
+            }
+
+            // If more than two candies match this shape, add them to the main matching array for this color
+            if (matchesForShape.length > 2) {
+                matchesForShape.forEach((shape) => matchesInLine.push(shape));
+            }
+        }
+
+        // If the array contains any matches
+        if (matchesInLine.length) {
+            return matchesInLine;
+        } else {
+            return null;
+        }
+    }
+
+    // Refresh the colorArrays so they're up-to-date
+    #update = () => {
+        for (let i = 0; i > candyColors.length; i++) {
+            this[candyColors[i]] = [];
+        }
+
+        this.ShapesInLine.forEach((shape) => {
+            this[shape.className].push(shape);
+        })
+    };
+}
+
 // When page loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
@@ -20,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     scoreDisplay = document.getElementById(`score`);
     countdownDisplay = document.getElementById(`timer`);
 
+    createCheckArrays();
     createBoard(width, height, grid);
     countdown = 60000;
     score = 0;
@@ -36,21 +126,35 @@ function onStatusChanged() {
     let boardFilled = moveDown();
 
     if (boardFilled) {
-        checkMatches();
+        //checkMatches();
     }
+}
+
+function createCheckArrays() {
+    rows = createLineChecks(height, `row`);
+    columns = createLineChecks(width, `column`);
+}
+function createLineChecks(amount, type) {
+    let array = [];
+    for (let i = 0; i < amount; i++ ){
+        array.push(new LineObject(type));
+    }
+    return array;
 }
 
 function createBoard(width, height, grid) {
     for (let row = 0; row < height; row++){
+
         for (let column = 0; column < width; column++)
         {
+            //Create new shape
             let shape = document.createElement(`div`);
 
-            // Shapes empty at start
+            // Shape is empty at start
             shape.className = `blank`;
-
             shape.setAttribute(`draggable`, `true`);
 
+            // Shape id
             let id = {row: row, column: column};
             shape.setAttribute(`id`, JSON.stringify(id));
 
@@ -61,8 +165,10 @@ function createBoard(width, height, grid) {
             shape.addEventListener(`dragleave`, dragLeave)
             shape.addEventListener(`drop`, dragDrop)
 
-            // put shape in grid
+            // put shape in grid, relevant rowArray, relevant columnArray
             grid.appendChild(shape);
+            rows[row].ShapesInLine.push(shape);
+            columns[column].ShapesInLine.push(shape);
         }
     }
 
@@ -120,7 +226,6 @@ function dragDrop() {
         }
     }
 }
-
 function dragOver(e) {
     e.preventDefault();
 }
